@@ -11,7 +11,7 @@ function App() {
   return (
     <>
       <Helmet>
-        <title>Amplify Hub - The Ultimate Fan Experience</title>
+        <title>Amplify - The Ultimate Experience</title>
         <meta name="description" content="Your central hub for live concerts, exclusive content, and connecting with your favorite artists." />
       </Helmet>
       <Router>

@@ -15,7 +15,7 @@ const LandingPage = () => {
   const handleSocialLogin = (platform) => {
     toast({
       title: `Signing in with ${platform}...`,
-      description: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
+      description: "🚧 This feature isn't implemented yet! 🚀",
     });
   };
   
@@ -59,7 +59,7 @@ const LandingPage = () => {
               Amplify Hub
             </h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl">
-              The ultimate fan experience. Your portal to live concerts, exclusive content, and new discoveries.
+              The ultimate experience. Your portal to live concerts, exclusive content, and new discoveries.
             </p>
           </motion.div>
 

@@ -34,7 +34,7 @@ const GalleryPage = () => {
   return (
     <>
       <Helmet>
-        <title>Gallery - Luna Starlight</title>
+        <title>Gallery - Luna Harvest</title>
         <meta name="description" content="Exclusive photos and videos from Luna Starlight's journey." />
       </Helmet>
       <div className="min-h-screen bg-black p-4 sm:p-6">
