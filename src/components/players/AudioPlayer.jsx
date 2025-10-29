@@ -19,7 +19,7 @@ const AudioPlayer = () => {
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
     toast({
-      title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀"
+      title: "🚧 This feature isn't implemented yet ! 🚀"
     });
   };
 
