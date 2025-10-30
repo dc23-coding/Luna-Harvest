@@ -24,17 +24,25 @@ const LivePlayer = () => {
   };
 
   const handleFullscreen = () => {
-    toast({
-      title: "🚧 This feature isn't implemented yet ! 🚀"
-    });
-  };
+  const playerElement = document.getElementById('live-player-container');
+  if (playerElement.requestFullscreen) {
+    playerElement.requestFullscreen();
+  } else if (playerElement.webkitRequestFullscreen) { // Safari
+    playerElement.webkitRequestFullscreen();
+  } else if (playerElement.msRequestFullscreen) { // IE/Edge
+    playerElement.msRequestFullscreen();
+  }
+};
+
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="relative aspect-video bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-2xl overflow-hidden glow-effect"
-    >
+  id="live-player-container"
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  className="relative aspect-video bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-2xl overflow-hidden glow-effect"
+>
+
       {/* Video Placeholder */}
       <div className="absolute inset-0 flex items-center justify-center">
         <img class="w-full h-full object-cover" alt="Live concert performance on stage with dramatic lighting" src="https://images.unsplash.com/photo-1523525930602-e1239a31310b" />
