@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Users, Twitter, Instagram, Youtube, Music } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { useArtistData } from '@/hooks/useArtistData';
-import { supabase } from '@/lib/supabase';
+import supabase from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 
 // Hook to persist user session across reloads
