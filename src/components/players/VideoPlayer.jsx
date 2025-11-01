@@ -2,25 +2,39 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useArtistData } from '@/hooks/useArtistData';
-import { Play } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Play, Pause } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 
 const VideoPlayer = () => {
   const { videos, isLoading } = useArtistData();
   const [mainVideo, setMainVideo] = useState(null);
-  const { toast } = useToast();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(30);
 
   useEffect(() => {
     if (videos && videos.length > 0) {
       setMainVideo(videos[0]);
     }
+    setIsPlaying(false);
+    setProgress(0);
   }, [videos]);
+  
+  useEffect(() => {
+    let interval;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 100) {
+            setIsPlaying(false);
+            return 100;
+          }
+          return prev + 1;
+        });
+      }, 500);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying]);
 
-  const handlePlay = () => {
-    toast({
-      title: "🚧 This feature isn't implemented yet ! 🚀"
-    });
-  };
 
   if (isLoading) {
     return <div className="aspect-video bg-black rounded-2xl flex items-center justify-center">Loading Videos...</div>;
@@ -37,20 +51,32 @@ const VideoPlayer = () => {
       className="flex flex-col lg:flex-row gap-4"
     >
       <div className="flex-grow lg:w-2/3">
-        <div className="relative aspect-video bg-black rounded-2xl overflow-hidden glow-effect">
+        <div className="relative aspect-video bg-black rounded-2xl overflow-hidden glow-effect group">
           <img class="w-full h-full object-cover" alt={mainVideo.title} src="https://images.unsplash.com/photo-1579623003002-841f9dee24d0" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <motion.button
-              onClick={handlePlay}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-16 h-16 rounded-full bg-purple-600/90 backdrop-blur-sm flex items-center justify-center"
-            >
-              <Play size={28} className="ml-1" />
-            </motion.button>
+          
+           {!isPlaying && (
+            <div className="absolute inset-0 flex items-center justify-center">
+                <motion.button
+                onClick={() => setIsPlaying(true)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="w-16 h-16 rounded-full bg-purple-600/90 backdrop-blur-sm flex items-center justify-center"
+                >
+                <Play size={28} className="ml-1" />
+                </motion.button>
+            </div>
+           )}
+
+          <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 to-transparent">
+             <div className="flex items-center gap-4">
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setIsPlaying(!isPlaying)}>
+                    {isPlaying ? <Pause size={20}/> : <Play size={20}/>}
+                </motion.button>
+                <Slider value={[progress]} max={100} step={1} className="w-full" onValueChange={(value) => setProgress(value[0])}/>
+             </div>
           </div>
-          <div className="absolute bottom-4 left-4">
+           <div className="absolute bottom-12 left-4">
             <h3 className="font-bold text-lg">{mainVideo.title}</h3>
             <p className="text-sm text-gray-300">{mainVideo.duration}</p>
           </div>

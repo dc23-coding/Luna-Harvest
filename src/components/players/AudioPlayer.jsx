@@ -3,30 +3,42 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useArtistData } from '@/hooks/useArtistData';
 import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
 import { Slider } from '@/components/ui/slider';
 
 const AudioPlayer = () => {
   const { music, isLoading } = useArtistData();
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const { toast } = useToast();
+  const [progress, setProgress] = useState(33);
 
   useEffect(() => {
     setCurrentTrackIndex(0);
+    setIsPlaying(false);
+    setProgress(0);
   }, [music]);
+  
+  useEffect(() => {
+    let interval;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 100) {
+            setIsPlaying(false);
+            return 100;
+          }
+          return prev + 0.5;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying, music]);
 
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-    toast({
-      title: "🚧 This feature isn't implemented yet ! 🚀"
-    });
-  };
 
   const handleSkip = (direction) => {
     if (!music || music.length === 0) return;
     const newIndex = (currentTrackIndex + direction + music.length) % music.length;
     setCurrentTrackIndex(newIndex);
+    setProgress(0);
   };
   
   if (isLoading) {
@@ -57,9 +69,9 @@ const AudioPlayer = () => {
       </div>
       
       <div className="space-y-4">
-        <Slider defaultValue={[33]} max={100} step={1} className="w-full" />
+        <Slider value={[progress]} max={100} step={1} className="w-full" onValueChange={(value) => setProgress(value[0])} />
         <div className="flex justify-between text-xs text-gray-400">
-          <span>1:02</span>
+          <span>{`1:02`}</span>
           <span>{currentTrack.duration}</span>
         </div>
         <div className="flex items-center justify-center gap-6">
@@ -67,7 +79,7 @@ const AudioPlayer = () => {
             <SkipBack size={24} />
           </motion.button>
           <motion.button 
-            onClick={handlePlayPause}
+            onClick={() => setIsPlaying(!isPlaying)}
             whileTap={{ scale: 0.9 }} 
             className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center text-white"
           >
