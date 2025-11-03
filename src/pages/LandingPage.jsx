@@ -2,70 +2,18 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
 import { Users, Twitter, Instagram, Youtube, Music } from 'lucide-react';
 import { Helmet } from 'react-helmet';
 import { useArtistData } from '@/hooks/useArtistData';
-import supabase from '@/lib/supabase';
-import { useEffect, useState } from 'react';
-
-// Hook to persist user session across reloads
-const useSupabaseSession = () => {
-  const [session, setSession] = useState(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) =>
-      setSession(session)
-    );
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  return session;
-};
+import { useUser, SignInButton, SignOutButton } from '@clerk/clerk-react';
 
 const LandingPage = () => {
-  const { toast } = useToast();
   const { artists } = useArtistData();
-  const session = useSupabaseSession();
-
-  const handleSocialLogin = async (platform) => {
-    const providerMap = {
-      Instagram: 'google',  // Instagram OAuth not directly supported
-      Twitter: 'twitter',
-      YouTube: 'google',
-      Music: 'spotify',     // Replace with 'github' if Spotify not enabled
-    };
-
-    const provider = providerMap[platform];
-    if (!provider) {
-      toast({ title: `Unsupported login: ${platform}` });
-      return;
-    }
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: window.location.origin + '/artist' },
-    });
-
-    if (error) {
-      toast({ title: `Login failed`, description: error.message });
-    } else {
-      toast({ title: `Redirecting to ${platform} login...` });
-    }
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    toast({ title: 'Signed out successfully.' });
-  };
+  const { isSignedIn, user } = useUser();
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15, delayChildren: 0.5 },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.5 } },
   };
 
   const itemVariants = {
@@ -77,10 +25,7 @@ const LandingPage = () => {
     <>
       <Helmet>
         <title>Welcome to Amplify Hub</title>
-        <meta
-          name="description"
-          content="Discover and connect with your favorite artists. Access live shows, exclusive galleries, and more."
-        />
+        <meta name="description" content="Discover and connect with your favorite artists." />
       </Helmet>
 
       <div className="relative min-h-screen w-full overflow-hidden bg-black flex flex-col items-center justify-start text-center p-4 pt-20">
@@ -94,7 +39,7 @@ const LandingPage = () => {
         </div>
 
         <main className="relative z-10 flex flex-col items-center w-full max-w-4xl mx-auto">
-          {/* Hero Section */}
+          {/* Title */}
           <motion.div
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -105,7 +50,7 @@ const LandingPage = () => {
               Amplify Hub
             </h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl">
-              The ultimate experience. Your portal to live concerts, exclusive content, and new discoveries.
+              The ultimate experience — your portal to live concerts, exclusive content, and new discoveries.
             </p>
           </motion.div>
 
@@ -138,41 +83,44 @@ const LandingPage = () => {
           </motion.div>
 
           {/* Auth Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1, ease: 'easeOut' }}
-          >
-            {!session ? (
-              <>
-                <p className="text-gray-400 mb-4 flex items-center justify-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Sign in to join the movement
-                </p>
-                <div className="flex justify-center gap-4">
-                  <Button variant="outline" className="border-gray-600 hover:bg-gray-800" onClick={() => handleSocialLogin('Instagram')}>
+          {!isSignedIn ? (
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-gray-400 flex items-center justify-center gap-2">
+                <Users className="h-5 w-5" /> Sign in to join the movement
+              </p>
+              <div className="flex justify-center gap-4">
+                <SignInButton mode="modal">
+                  <Button variant="outline" className="border-gray-600 hover:bg-gray-800">
                     <Instagram className="h-5 w-5 text-pink-400" />
                   </Button>
-                  <Button variant="outline" className="border-gray-600 hover:bg-gray-800" onClick={() => handleSocialLogin('Twitter')}>
+                </SignInButton>
+                <SignInButton mode="modal">
+                  <Button variant="outline" className="border-gray-600 hover:bg-gray-800">
                     <Twitter className="h-5 w-5 text-blue-400" />
                   </Button>
-                  <Button variant="outline" className="border-gray-600 hover:bg-gray-800" onClick={() => handleSocialLogin('Music')}>
+                </SignInButton>
+                <SignInButton mode="modal">
+                  <Button variant="outline" className="border-gray-600 hover:bg-gray-800">
                     <Music className="h-5 w-5 text-green-400" />
                   </Button>
-                  <Button variant="outline" className="border-gray-600 hover:bg-gray-800" onClick={() => handleSocialLogin('YouTube')}>
+                </SignInButton>
+                <SignInButton mode="modal">
+                  <Button variant="outline" className="border-gray-600 hover:bg-gray-800">
                     <Youtube className="h-5 w-5 text-red-500" />
                   </Button>
-                </div>
-              </>
-            ) : (
-              <div className="text-center mt-6">
-                <p className="text-purple-300 mb-4">Welcome back, {session.user.email || 'Fan'}!</p>
-                <Button onClick={handleSignOut} className="bg-purple-600 hover:bg-purple-700 text-white">
-                  Sign Out
-                </Button>
+                </SignInButton>
               </div>
-            )}
-          </motion.div>
+            </div>
+          ) : (
+            <div className="text-center mt-6">
+              <p className="text-purple-300 mb-4">
+                Welcome back, {user?.fullName || user?.primaryEmailAddress?.emailAddress}!
+              </p>
+              <SignOutButton>
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white">Sign Out</Button>
+              </SignOutButton>
+            </div>
+          )}
         </main>
       </div>
     </>
